@@ -67,6 +67,79 @@ function Promise(fn) {
     }
 }
 
+Promise.prototype.then = function(onFulfilled, onRejected) {
+    if(typeof onFulfilled !== 'function') {
+        onFulfilled = (v) => v;
+    }
+    if(typeof onRejected !== 'function') {
+        onRejected = (e) => { throw e; };
+    }
+    return _then(onFulfilled, onRejected, this);
+};
+
+Promise.resolve = function(val) {
+    return new Promise((resolve, reject) => resolve(val));
+};
+
+Promise.reject = function(rejection) {
+    return new Promise((resolve, reject) => reject(rejection));
+};
+
+Promise.all = function(promiseArr) {
+    // better error than native promises
+    if(!Array.isArray(promiseArr)) {
+        return Promise.reject('non-array passed to Promise.all');
+    }
+
+    // Native promise behaviour
+    if(promiseArr.length === 0) {
+        return Promise.resolve([]);
+    }
+
+    return new Promise((resolve, reject) => {
+        let total = promiseArr.length,
+            count = 0,
+            results = [];
+
+        promiseArr.forEach((item, index) => {
+            Promise.resolve(item)
+                .then(
+                    (v) => {
+                        count++;
+                        results[index] = v;
+
+                        if(count >= total) {
+                            resolve(results);
+                        }
+                    },
+                    (e) => reject(e)
+                );
+        });
+    });
+};
+
+Promise.race = function(promiseArr) {
+    // better error than native promises
+    if(!Array.isArray(promiseArr)) {
+        return Promise.reject('non-array passed to Promise.race');
+    }
+
+    // Non-native behaviour, native promise return pending promise that never resolves
+    if(promiseArr.length === 0) {
+        return Promise.reject('empty-array passed to Promise.race');
+    }
+
+    return new Promise((resolve, reject) => {
+        promiseArr.forEach((item) => {
+            Promise.resolve(item)
+                .then(
+                    (v) => resolve(v),
+                    (e) => reject(e)
+                );
+        });
+    });
+}
+
 function runThensWithRejection(err, self) {
     self._val = err;
     self._state = STATES.REJECTED;
@@ -103,16 +176,6 @@ function runThenWithFulfillment(thenObj, val) {
             thenObj.reject(e);
         }
     });
-}
-
-Promise.prototype.then = function(onFulfilled, onRejected) {
-    if(typeof onFulfilled !== 'function') {
-        onFulfilled = (v) => v;
-    }
-    if(typeof onRejected !== 'function') {
-        onRejected = (e) => { throw e; };
-    }
-    return _then(onFulfilled, onRejected, this);
 }
 
 function _then(onFulfilled, onRejected, promise) {
