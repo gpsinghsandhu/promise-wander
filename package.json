@@ -1,0 +1,24 @@
+{
+  "name": "promise-wander",
+  "version": "1.0.0",
+  "description": "my wanderings into the Promise-land",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gpsinghsandhu/promise-wander.git"
+  },
+  "author": "gpsinghsandhu@yahoo.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gpsinghsandhu/promise-wander/issues"
+  },
+  "homepage": "https://github.com/gpsinghsandhu/promise-wander#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "mocha": "^3.3.0"
+  }
+}
