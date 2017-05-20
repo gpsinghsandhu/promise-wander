@@ -22,7 +22,11 @@ function Promise(fn) {
     this._thenArray = [];
     this._val = undefined;
 
-    fn(resolve, reject);
+    try {
+        fn(resolve, reject)
+    } catch(e) {
+        reject(e);
+    };
     return this;
 
     function resolve(val) {
