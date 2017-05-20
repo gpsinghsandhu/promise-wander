@@ -34,6 +34,4 @@ describe('Promise constructor', function() {
 
         return assert.isRejected(promise, 'error', 'promise should reject');
     });
-
-    it('should ignore errors if')
 });
