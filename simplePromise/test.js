@@ -3,7 +3,9 @@
 var chai = require('chai'),
     assert = chai.assert,
     MyPromise = require('./promise.js'),
-    chaiAsPromised = require('chai-as-promised');
+    chaiAsPromised = require('chai-as-promised'),
+    adapter = require('./testAdapter.js'),
+    nativeAdapter = require('./nativeAdapter.js');
 
 chai.use(chaiAsPromised);
 
@@ -35,3 +37,11 @@ describe('Promise constructor', function() {
         return assert.isRejected(promise, 'error', 'promise should reject');
     });
 });
+
+describe('Promises/A+ compliance Tests', function() {
+    require("promises-aplus-tests").mocha(adapter);
+});
+
+// describe('Promises/A+ compliance Tests native', function() {
+//     require("promises-aplus-tests").mocha(nativeAdapter);
+// });

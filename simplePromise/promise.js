@@ -6,8 +6,17 @@ const STATES = {
         REJECTED: 'rejected'
     };
 
+function isObject(p) {
+    return p !== null && (typeof p === 'object');
+}
+
 function isThenable(p) {
-    return p && (typeof p.then === 'function');
+    if(typeof p === 'object' || typeof p === 'function') {
+        if(typeof then === 'function') {
+            return true;
+        }
+    }
+    return false;
 }
 
 function delayed(fn) {
@@ -37,23 +46,44 @@ function Promise(fn) {
     }
 
     function singleResolve(val) {
-        let innerResolved = false;
+        let innerResolved = false,
+            thenFn;
 
-        if(isThenable(val)) {
-            val.then(
-                (v) => {
+        if(val === self) {
+            singleReject(new TypeError('then returns same promise'));
+        } else if(isObject(val) || typeof val === 'function') {
+            try {
+                thenFn = val.then;
+            } catch(e) {
+                singleReject(e);
+                return;
+            }
+
+            if(typeof thenFn === 'function') {
+                try {
+                    thenFn.call(
+                        val,
+                        (v) => {
+                            if(!innerResolved) {
+                                innerResolved = true;
+                                singleResolve(v);
+                            }
+                        },
+                        (e) => {
+                            if(!innerResolved) {
+                                innerResolved = true;
+                                singleReject(e);
+                            }
+                        }
+                    );
+                } catch(e) {
                     if(!innerResolved) {
-                        innerResolved = true;
-                        singleResolve(v);
-                    }
-                },
-                (e) => {
-                    if(!innerResolved) {
-                        innerResolved = true;
                         singleReject(e);
                     }
                 }
-            );
+            } else {
+                runThensWithFulfillment(val, self);
+            }
         } else {
             runThensWithFulfillment(val, self);
         }
@@ -148,14 +178,17 @@ function runThensWithRejection(err, self) {
     self._val = err;
     self._state = STATES.REJECTED;
     self._thenArray.forEach((item) => {
-        runThenWithRejection(item, err);
+        runThenWithRejection(item, err, self);
     });
 }
 
-function runThenWithRejection(thenObj, err) {
+function runThenWithRejection(thenObj, err, promise) {
     delayed(() => {
         try {
             let res = thenObj.onRejected(err);
+            if(res === promise) {
+                throw new TypeError('then returns same promise');
+            }
             thenObj.resolve(res);
         } catch(e) {
             thenObj.reject(e);
@@ -167,14 +200,17 @@ function runThensWithFulfillment(val, self) {
     self._val = val;
     self._state = STATES.FULFILLED;
     self._thenArray.forEach((item) => {
-        runThenWithFulfillment(item, val);
+        runThenWithFulfillment(item, val, self);
     });
 }
 
-function runThenWithFulfillment(thenObj, val) {
+function runThenWithFulfillment(thenObj, val, promise) {
     delayed(() => {
         try {
             let res = thenObj.onFulfilled(val);
+            if(res === promise) {
+                throw new TypeError('then returns same promise');
+            }
             thenObj.resolve(res);
         } catch(e) {
             thenObj.reject(e);
@@ -208,8 +244,15 @@ function pendingThen(onFulfilled, onRejected, promise) {
 function fulfilledThen(onFulfilled, promise) {
     return new Promise((resolve, reject) => {
         delayed(() => { 
-            let res = onFulfilled(promise._val);
-            resolve(res);
+            try {
+                let res = onFulfilled(promise._val);
+                if(res === promise) {
+                    throw new TypeError('then returns same promise');
+                }
+                resolve(res);
+            } catch(e) {
+                reject(e);
+            }
         });
     });
 }
@@ -219,6 +262,9 @@ function rejectedThen(onRejected, promise) {
         delayed(() => {
             try {
                 let res = onRejected(promise._val);
+                if(res === promise) {
+                    throw new TypeError('then returns same promise');
+                }
                 resolve(res);
             } catch(e) {
                 reject(e);
