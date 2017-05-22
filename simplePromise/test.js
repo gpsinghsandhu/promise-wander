@@ -11,7 +11,7 @@ chai.use(chaiAsPromised);
 
 describe('Promise constructor', function() {
 
-    it('should return something like promise (i.e with then function)', function() {
+    it('should return something like promise (i.e object with then method)', function() {
         var promise = new MyPromise(function(reject, resolve) {});
 
         assert.isObject(promise, 'promise is object');
@@ -30,11 +30,25 @@ describe('Promise constructor', function() {
         return assert.isRejected(promise, 'val', 'promise should reject');
     });
 
-    it('should return rejected promise if passed fn throws', function() {
-        var err = new Error('error'),
-            promise = new MyPromise((resolve, reject) => {throw err;});
+    describe('fn is passed to constructor', function() {
+        it('should return rejected promise if passed fn throws', function() {
+            var err = new Error('error'),
+                promise = new MyPromise((resolve, reject) => {throw err;});
 
-        return assert.isRejected(promise, 'error', 'promise should reject');
+            return assert.isRejected(promise, 'error', 'promise should reject');
+        });
+
+        it('should ignore thrown error if resolved called first', function() {
+            var promise = new MyPromise((resolve, reject) => { resolve('some'); throw new Error('error'); });
+
+            return assert.becomes(promise, 'some', 'thrown error not ignored');
+        });
+
+        it('should ignore thrown error if reject called first', function() {
+            var promise = new MyPromise((resolve, reject) => { reject('some'); throw new Error('error'); });
+
+            return assert.isRejected(promise, 'some', 'thrown error not ignored');
+        });
     });
 });
 
