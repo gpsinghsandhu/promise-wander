@@ -24,7 +24,7 @@ var getSamplePromises = (() => {
         } else {
             return delayedResolvedPromise(1000);
         }
-    }
+    };
 })();
 
 function main() {

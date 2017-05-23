@@ -32,10 +32,10 @@ function Promise(fn) {
     this._val = undefined;
 
     try {
-        fn(resolve, reject)
+        fn(resolve, reject);
     } catch(e) {
         reject(e);
-    };
+    }
     return this;
 
     function resolve(val) {
@@ -172,7 +172,7 @@ Promise.race = function(promiseArr) {
                 );
         });
     });
-}
+};
 
 function runThensWithRejection(err, self) {
     self._val = err;
@@ -270,7 +270,7 @@ function rejectedThen(onRejected, promise) {
                 reject(e);
             }
         });
-    })
+    });
 }
 
 module.exports = Promise;

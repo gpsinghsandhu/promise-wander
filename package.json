@@ -4,7 +4,8 @@
   "description": "my wanderings into the Promise-land",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha -b simplePromise/test.js"
+    "test": "./node_modules/mocha/bin/mocha -b simplePromise/test.js",
+    "testWatch": "./node_modules/mocha/bin/mocha -w simplePromise/test.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "mocha": "^3.3.0",
-    "promises-aplus-tests": "^2.1.2"
+    "promises-aplus-tests": "^2.1.2",
+    "sinon": "^2.3.1"
   }
 }

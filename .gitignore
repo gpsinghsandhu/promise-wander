@@ -1,2 +1,3 @@
 node_modules/
 changeAuthor.sh
+npm-debug.log
