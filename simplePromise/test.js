@@ -277,14 +277,14 @@ describe('Promise utils', function() {
             assert.isRejected(MyPromise.all());
             assert.isRejected(MyPromise.all(''));
             assert.isRejected(MyPromise.all(1));
-            console.log(assert.isRejected(MyPromise.all(null)));
+            assert.isRejected(MyPromise.all(null));
         });
     });
 });
 
-// describe('Promises/A+ compliance Tests', function() {
-//     require("promises-aplus-tests").mocha(adapter);
-// });
+describe('Promises/A+ compliance Tests', function() {
+    require("promises-aplus-tests").mocha(adapter);
+});
 
 // describe('Promises/A+ compliance Tests native', function() {
 //     require("promises-aplus-tests").mocha(nativeAdapter);
