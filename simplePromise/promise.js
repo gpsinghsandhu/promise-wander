@@ -183,7 +183,7 @@ function runThensWithRejection(err, self) {
 }
 
 function runThenWithRejection(thenObj, err, promise) {
-    delayed(() => {
+    // delayed(() => {
         try {
             let res = thenObj.onRejected(err);
             if(res === promise) {
@@ -193,7 +193,7 @@ function runThenWithRejection(thenObj, err, promise) {
         } catch(e) {
             thenObj.reject(e);
         }
-    });
+    // });
 }
 
 function runThensWithFulfillment(val, self) {
@@ -205,7 +205,7 @@ function runThensWithFulfillment(val, self) {
 }
 
 function runThenWithFulfillment(thenObj, val, promise) {
-    delayed(() => {
+    // delayed(() => {
         try {
             let res = thenObj.onFulfilled(val);
             if(res === promise) {
@@ -215,7 +215,7 @@ function runThenWithFulfillment(thenObj, val, promise) {
         } catch(e) {
             thenObj.reject(e);
         }
-    });
+    // });
 }
 
 function _then(onFulfilled, onRejected, promise) {

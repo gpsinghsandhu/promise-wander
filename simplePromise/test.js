@@ -194,9 +194,97 @@ describe('Promise then fn', function() {
     });
 });
 
-describe('Promises/A+ compliance Tests', function() {
-    require("promises-aplus-tests").mocha(adapter);
+describe('Promise utils', function() {
+    describe('all', function() {
+        it('should resolve when all promises resolve', function() {
+            let deferreds = [];
+
+            for(let i=0; i<10; i++) {
+                deferreds.push(utils.deferred());
+            }
+
+            let promises = deferreds.map(function(deferred) {
+                return deferred.promise;
+            });
+
+            let finalPromise = MyPromise.all(promises),
+                onFulfilled = sinon.spy(),
+                onRejected = sinon.spy();
+
+            finalPromise.then(onFulfilled, onRejected);
+
+            for(let i=0; i<9; i++) {
+                deferreds[i].resolve('success');
+            }
+
+            return utils.delayed()
+                .then((x) => {
+                    assert.notCalled(onFulfilled);
+                    assert.notCalled(onRejected);
+                    return x;
+                })
+                .then(() => {
+                    deferreds[9].resolve('success');
+                    return deferreds[9].promise;
+                })
+                .then(() => {
+                    assert.calledOnce(onFulfilled);
+                    assert.notCalled(onRejected);
+                });
+        });
+
+        it('should reject when one promise rejects', function() {
+            let deferreds = [];
+
+            for(let i=0; i<10; i++) {
+                deferreds.push(utils.deferred());
+            }
+
+            let promises = deferreds.map(function(deferred) {
+                return deferred.promise;
+            });
+
+            let finalPromise = MyPromise.all(promises),
+                onFulfilled = sinon.spy(),
+                onRejected = sinon.spy();
+
+            finalPromise.then(onFulfilled, onRejected);
+
+
+            return utils.delayed()
+                .then((x) => {
+                    assert.notCalled(onFulfilled);
+                    assert.notCalled(onRejected);
+                    return x;
+                })
+                .then(() => {
+                    deferreds[4].reject('error');
+                    return utils.delayed();
+                })
+                .then(() => {
+                    assert.notCalled(onFulfilled);
+                    assert.calledOnce(onRejected);
+                });
+        });
+
+        it('should return fulfilled promise when empty array is passed', function() {
+            let promise = MyPromise.all([]);
+
+            return assert.becomes(promise, []);
+        });
+
+        it('should return rejected promise if non-array is passed', function() {
+            assert.isRejected(MyPromise.all());
+            assert.isRejected(MyPromise.all(''));
+            assert.isRejected(MyPromise.all(1));
+            console.log(assert.isRejected(MyPromise.all(null)));
+        });
+    });
 });
+
+// describe('Promises/A+ compliance Tests', function() {
+//     require("promises-aplus-tests").mocha(adapter);
+// });
 
 // describe('Promises/A+ compliance Tests native', function() {
 //     require("promises-aplus-tests").mocha(nativeAdapter);
